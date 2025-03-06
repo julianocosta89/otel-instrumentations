@@ -1,0 +1,73 @@
+name: otel-workshop
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME}
+    driver: bridge
+
+services:
+
+  temperature-simulator:
+    image: ${COMPOSE_PROJECT_NAME}-temp-simulator
+    build:
+      context: ./src/temperature-simulator
+    ports:
+      - 8080:8080
+    environment:
+      - DATA_PROCESSING_URL=http://data-processing:9000/processTemperature
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+    depends_on:
+      otelcol:
+        condition: service_started
+
+  temperature-calculator:
+    image: ${COMPOSE_PROJECT_NAME}-temp-calculator
+    build:
+      context: ./src/temperature-calculator
+    ports:
+      - 8088
+    environment:
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
+      - OTEL_RESOURCE_ATTRIBUTES=service.version=0.0.1
+      - OTEL_SERVICE_NAME=temperature-calculator
+    depends_on:
+      otelcol:
+        condition: service_started
+
+  data-processing:
+    image: ${COMPOSE_PROJECT_NAME}-data-processing
+    build:
+      context: ./src/data-processing
+    restart: unless-stopped
+    ports:
+      - 9000
+    environment:
+      - TEMP_CALCULATOR_ADDR=http://temperature-calculator:8088
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otelcol:4317
+      - OTEL_SERVICE_NAME=data-processing
+      - OTEL_RESOURCE_ATTRIBUTES=service.version=1.0.0
+    depends_on:
+      otelcol:
+        condition: service_started
+
+  # OpenTelemetry Collector
+  otelcol:
+    container_name: otelcol
+    image: otel/opentelemetry-collector-contrib:0.120.0
+    deploy:
+      resources:
+        limits:
+          memory: 200M
+    restart: unless-stopped
+    command:
+      - "--config=/etc/otelcol-config.yml"
+      - "--feature-gates=datadog.EnableOperationAndResourceNameV2"
+    volumes:
+      - ./src/otelcollector/otelcol-config.yml:/etc/otelcol-config.yml
+    ports:
+      - 4317
+      - 4318
+    environment:
+      - DD_SITE
+      - DD_API_KEY

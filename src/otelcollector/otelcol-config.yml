@@ -1,0 +1,55 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: otelcol:4317
+      http:
+        endpoint: otelcol:4318
+
+processors:
+  batch:
+  resource:
+    attributes:
+      - key: deployment.environment
+        value: "otel-workshop"
+        action: upsert
+
+exporters:
+  debug:
+  datadog:
+    hostname: "otelcol-docker"
+    api:
+      site: ${DD_SITE}
+      key: ${DD_API_KEY}
+
+connectors:
+  datadog/connector:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [debug, datadog, datadog/connector]
+    metrics:
+      receivers: [otlp, datadog/connector]
+      processors: [resource, batch]
+      exporters: [debug, datadog]
+    logs:
+      receivers: [otlp]
+      processors: [resource, batch]
+      exporters: [debug, datadog]
+  telemetry:
+    logs:
+      level: info
+      encoding: json
+    metrics:
+      level: detailed
+      readers:
+        - periodic:
+            interval: 10000
+            timeout: 5000
+            exporter:
+              otlp:
+                protocol: grpc
+                endpoint: otelcol:4317

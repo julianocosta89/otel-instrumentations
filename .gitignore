@@ -1,0 +1,35 @@
+# Java
+*.class
+
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+*.log
+*.project
+*.classpath
+*.settings/
+*.factorypath
+target/
+build/
+out/
+bin/
+.gradle/
+.mvn/
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Rust
+/target/
+**/*.rs.bk
+*.rs.bk
+*.rs~
+*.rs.bk
+*.rs.swp
+*.rs.swo
+
+# VSCode
+.vscode/
