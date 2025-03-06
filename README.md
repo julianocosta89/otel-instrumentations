@@ -12,11 +12,11 @@ a service, all 3 services are instrumented to produce Traces, Metrics and Logs:
 
 ```mermaid
 graph LR
-    TempSimulator(fab:fa-java<br/>Temperature<br/>Simulator):::java
-    DataProcessing(fab:fa-rust<br/>Data<br/>Processing):::rust
-    TempCalculator(fab:fa-java<br/>Temperature<br/>Calculator):::java
+    TempSimulator(Temperature<br/>Simulator):::java
+    DataProcessing(Data<br/>Processing):::rust
+    TempCalculator(Temperature<br/>Calculator):::java
 
-    Internet[fa:fa-user Internet] --HTTP--> TempSimulator
+    Internet --HTTP--> TempSimulator
     TempSimulator --HTTP--> DataProcessing
     DataProcessing --HTTP--> TempCalculator
 
@@ -62,9 +62,9 @@ You can check the full Collector configuration in the
 
 ```mermaid
 graph TD
-    TempSimulator(fab:fa-java<br/>Temperature<br/>Simulator):::java
-    DataProcessing(fab:fa-rust<br/>Data<br/>Processing):::rust
-    TempCalculator(fab:fa-java<br/>Temperature<br/>Calculator):::java
+    TempSimulator(Temperature<br/>Simulator):::java
+    DataProcessing(Data<br/>Processing):::rust
+    TempCalculator(Temperature<br/>Calculator):::java
 
     otelcol(OpenTelemetry<br/>Collector):::otelcol
     datadog(Datadog):::datadog
